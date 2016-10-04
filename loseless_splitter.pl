@@ -284,23 +284,40 @@ sub split_flac {
         }
         my $date = $album_info->{DATE};
         my $genre = $album_info->{GENRE};
-        my $album = $album_info->{TITLE};
+        my $album = $album_info->{ALBUM};
         $album = " " if !defined $album;
         $genre = " " if !defined $genre;
         $date = " " if !defined $date;
         my $track_title = $album_info->{FILE}->{$filekey}->{$i}->{TITLE};
         if ($dirs != 0)
         {
-            $out_flac = "Disc $dirs/$i - $performer - $track_title.flac"
+            $out_flac = "./Disc $dirs/$i - $performer - $track_title.flac"
         }
         else
         {
-            $out_flac = "$i - $performer - $track_title.flac";
+            $out_flac = "./$i - $performer - $track_title.flac";
 
         }
         $out_flac =~ s/"//g;
         $out_flac =~ s/`/\\`/g;
         $genre =~ s/`/\\`/g if defined $genre;
+        #
+        # Удаление замыкающих кавычек
+        #
+        $genre =~ s/^"(.*)"$/$1/g if defined $genre;
+        $album =~ s/^"(.*)"$/$1/g if defined $album;
+        $performer =~ s/^"(.*)"$/$1/g if defined $performer;
+        $track_title =~ s/^"(.*)"$/$1/g if defined $track_title;
+
+
+        #
+        # Экранирование Внутренних кавычек
+        #
+        $genre =~ s/"//g if defined $genre;
+        $album =~ s/"/\\"/g if defined $album;
+        $performer =~ s/"/\\"/g if defined $performer;
+        $track_title =~ s/"/\\"/g if defined $track_title;
+
         $track_title =~ s/`/\\`/g if defined $track_title;
         $performer =~ s/`/\\`/g if defined $performer;
         $album =~ s/`/\\`/g if defined $album;
@@ -313,11 +330,11 @@ sub split_flac {
             --tag genre="$genre" \\
             --tag album="$album" \\
             --tag tracknumber="$i" \\
-            --tag artist=$performer \\
-            --tag title=$track_title \\
+            --tag artist="$performer" \\
+            --tag title="$track_title" \\
             temp.wav && rm temp.wav
             };
-            #print "Use: $command";
+            #           print "Use: $command";
         `$command`;
     }
 
