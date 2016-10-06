@@ -48,7 +48,7 @@ sub work_dir {
     closedir $workdir;
 
     my $cue_count = grep { m/.*\.cue$/i } @filelist;
-    my $file_count = grep { m/.*\.(flac|ape|wv)/i } @filelist;
+    my $file_count = grep { m/.*\.(flac|ape|wv)$/i } @filelist;
     
     for my $i (@filelist)
     {
@@ -71,6 +71,27 @@ sub work_dir {
         for my $k (grep { m/.*\.cue$/i } @filelist)
         {
                 cue_analitic($k);
+        }
+        my $rep_files = {};
+        my $rep_ind;
+        #
+        # Удаляем дубликаты с разными расширениями
+        #
+        for my $rep (keys $album_info->{FILE})
+        {
+            $rep_ind = $rep;
+            $rep_ind =~ s/(\.flac|\.ape|\.wav|\.wv)"$//i;
+            $rep_files->{$rep_ind}->{$rep} = 1;       
+        }
+        for my $rep_proc (keys %{$rep_files})
+        {
+            for my $rp (keys $rep_files->{$rep_proc})
+            {
+                if ($rp =~ m/$rep_proc.wav/i)
+                {
+                    delete $album_info->{FILE}->{"$rp"};
+                }
+            }
         }
     }
     else
@@ -113,8 +134,6 @@ sub cue_enc {
         return undef;
     }
 }
-
-
 
 
 #
@@ -288,6 +307,9 @@ sub split_flac {
         $album = " " if !defined $album;
         $genre = " " if !defined $genre;
         $date = " " if !defined $date;
+
+        $performer =~ s/\///g;
+
         my $track_title = $album_info->{FILE}->{$filekey}->{$i}->{TITLE};
         if ($dirs != 0)
         {
@@ -298,7 +320,7 @@ sub split_flac {
             $out_flac = "$i - $performer - $track_title.flac";
 
         }
-        $out_flac =~ s/"|\\|\/|\:|\*|\?//g;
+        $out_flac =~ s/"|\\|\:|\*|\?//g;
         $out_flac =~ s/`/\\`/g;
         $genre =~ s/`/\\`/g if defined $genre;
         #
