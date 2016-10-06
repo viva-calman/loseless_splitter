@@ -324,7 +324,7 @@ sub split_flac {
             $out_flac = "$i - $performer_f - $title_f.flac";
 
         }
-        $out_flac =~ s/"|\\|\:|\*|\?//g;
+        $out_flac =~ s/"|\\|\:|\*|\?|\<|\>//g;
         $out_flac =~ s/`/\\`/g;
         $genre =~ s/`/\\`/g if defined $genre;
         #
