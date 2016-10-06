@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use warnings;
+#use warnings;
 use strict;
 use Data::Dumper;
 use utf8;
@@ -210,7 +210,7 @@ sub splitting {
         {
             print "Not found, try another extensions\n";
             $temp_i =~ s/.(wav|ape|flac|wv)$//i;
-            my ($j) = grep { m/$temp_i.(flac|ape|wv)/ } @filelist;
+            my ($j) = grep { m/$temp_i.(flac|ape|wv)/i } @filelist;
             if( -e $j)
             {
                 print "Found: $j, process\n";
@@ -242,7 +242,7 @@ sub process {
         print "Convert .ape to .flac";
         my $flacname = $filename;
         $flacname =~ s/\.ape$/\.flac/;
-        system("ffmpeg -i $filename $flacname");
+        system("ffmpeg -i \"$filename\" \"$flacname\"");
         split_flac($flacname,$filekey);
     }
     elsif ($filename =~ m/.*\.wv/)
@@ -291,14 +291,14 @@ sub split_flac {
         my $track_title = $album_info->{FILE}->{$filekey}->{$i}->{TITLE};
         if ($dirs != 0)
         {
-            $out_flac = "./Disc $dirs/$i - $performer - $track_title.flac"
+            $out_flac = "Disc $dirs/$i - $performer - $track_title.flac"
         }
         else
         {
-            $out_flac = "./$i - $performer - $track_title.flac";
+            $out_flac = "$i - $performer - $track_title.flac";
 
         }
-        $out_flac =~ s/"//g;
+        $out_flac =~ s/"|\\|\/|\:|\*|\?//g;
         $out_flac =~ s/`/\\`/g;
         $genre =~ s/`/\\`/g if defined $genre;
         #
@@ -325,7 +325,7 @@ sub split_flac {
             flac  \\
             --compression-level-8 \\
             --force \\
-            --output-name "$out_flac" \\
+            --output-name "./$out_flac" \\
             --tag date="$date" \\
             --tag genre="$genre" \\
             --tag album="$album" \\
