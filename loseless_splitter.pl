@@ -52,7 +52,7 @@ sub work_dir {
     
     for my $i (@filelist)
     {
-        print "$i\n";
+        #print "$i\n";
         if ($i =~ m/.*\.wv\.iso/)
         {
             `7z x "$i" && mv "$i" "$i.old"`;
@@ -87,8 +87,9 @@ sub work_dir {
         {
             for my $rp (keys $rep_files->{$rep_proc})
             {
-                if ($rp =~ m/$rep_proc.wav/i)
+                if ($rp =~ m/.*\.wav"$/i)
                 {
+                    print "~";
                     delete $album_info->{FILE}->{"$rp"};
                 }
             }
