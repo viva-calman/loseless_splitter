@@ -308,17 +308,20 @@ sub split_flac {
         $album = " " if !defined $album;
         $genre = " " if !defined $genre;
         $date = " " if !defined $date;
-
-        $performer =~ s/\///g;
-
         my $track_title = $album_info->{FILE}->{$filekey}->{$i}->{TITLE};
+        my $performer_f = $performer;
+        my $title_f = $track_title;
+        $performer_f =~ s/\///g;
+        $title_f =~ s/\///g;
+
+
         if ($dirs != 0)
         {
-            $out_flac = "Disc $dirs/$i - $performer - $track_title.flac"
+            $out_flac = "Disc $dirs/$i - $performer_f - $title_f.flac"
         }
         else
         {
-            $out_flac = "$i - $performer - $track_title.flac";
+            $out_flac = "$i - $performer_f - $title_f.flac";
 
         }
         $out_flac =~ s/"|\\|\:|\*|\?//g;
@@ -357,7 +360,7 @@ sub split_flac {
             --tag title="$track_title" \\
             temp.wav && rm temp.wav
             };
-            #           print "Use: $command";
+#            print "Use: $command";
         `$command`;
     }
 
