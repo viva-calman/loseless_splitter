@@ -268,7 +268,7 @@ sub process {
     elsif ($filename =~ m/.*\.wv/)
     {
         my $wavname = $filename;
-        my $wvtype = `soxi -e $filename`;
+        my $wvtype = `soxi -e "$filename"`;
         if($wvtype =~ m/Floating Point WavPack/ or $wvtype =~ m/Floating Point PCM/)
         {
             print "\nWARNING!!!\n Convert floating point PCM into signed integer!\n";
@@ -276,7 +276,7 @@ sub process {
         $wavname =~ s/\.wv$/\.wav/;
         my $flacname = $filename;
         $flacname =~s/\.wv/\.flac/;
-        `wvunpack $filename && ffmpeg -i $wavname $flacname`;
+        `wvunpack "$filename" && ffmpeg -i "$wavname" "$flacname"`;
         split_flac($flacname,$filekey);
     }
     else
