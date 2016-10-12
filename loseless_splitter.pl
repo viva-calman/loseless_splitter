@@ -227,7 +227,7 @@ sub splitting {
         my $temp_i = $i;
         $temp_i =~ s/^"//;
         $temp_i =~ s/"$//;
-        $temp_i =~ s/(\[|\]|\(|\)|\\)/\\$1/g;
+        $temp_i =~ s/(\[|\]|\(|\)|\\|\+)/\\$1/g;
         if( -e "$temp_i" )
         {
             print "Found, process\n";
