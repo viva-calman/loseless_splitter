@@ -52,7 +52,7 @@ sub work_dir {
     
     for my $i (@filelist)
     {
-        #print "$i\n";
+        print "$i\n";
         if ($i =~ m/.*\.wv\.iso/)
         {
             `7z x "$i" && mv "$i" "$i.old"`;
@@ -209,11 +209,17 @@ sub cue_analitic {
 #
 # Выбираем файл для разрезания
 #
+=head2 Функция splitting
+    Внешняя обертка для разрезания файлов.
+    Проверяем количество файлов для обработки. Треки из каждого образа помещаются в отдельную директорию, число директорий соответствует количеству файлов. Если файл один, дополнительные директории не создаются
+    Если в .cue файле записано имя файла с расширением .wav, ищем в списке файлов файл с таким же именем, но с другим расширением. Каждый обнаруженный файл передается в функцию process().
+=cut
+
 sub splitting {
     if(1 < scalar keys $album_info->{FILE})
     {
         print "Creating additional dirs\n";
-        $dirs=1;
+        $dirs = 1;
     }
     for my $i (sort keys $album_info->{FILE})
     {
@@ -221,7 +227,8 @@ sub splitting {
         my $temp_i = $i;
         $temp_i =~ s/^"//;
         $temp_i =~ s/"$//;
-        if( -e $temp_i )
+        $temp_i =~ s/(\[|\]|\(|\)|\\)/\\$1/g;
+        if( -e "$temp_i" )
         {
             print "Found, process\n";
             process($temp_i,$i);
@@ -229,9 +236,9 @@ sub splitting {
         else
         {
             print "Not found, try another extensions\n";
-            $temp_i =~ s/.(wav|ape|flac|wv)$//i;
-            my ($j) = grep { m/$temp_i.(flac|ape|wv)/i } @filelist;
-            if( -e $j)
+            $temp_i =~ s/\.(wav|ape|flac|wv)$//i;
+            my ($j) = grep { m/$temp_i.(flac|ape|wv)$/i } @filelist;
+            if( -e "$j")
             {
                 print "Found: $j, process\n";
                 process($j,$i);
@@ -245,17 +252,24 @@ sub splitting {
     }
 }
 
+=head2 Функция process
+    
+=cut
+
 sub process {
     my $filename = shift;
     my $filekey = shift;
-    if($dirs != 0 && 1 < scalar keys $album_info->{FILE}->{$filekey})
+    if($dirs != 0) # && 1 < scalar keys $album_info->{FILE}->{$filekey})
     {
         mkdir "Disc $dirs";
     }
+    if (1 == scalar keys $album_info->{FILE}->{$filekey})
+    {
+        print "Single track in file\n";
+    }
     if ($filename =~ m/.*\.flac$/)
     {
-        split_flac($filename,$filekey);
-                
+            split_flac($filename,$filekey);
     }
     elsif ($filename =~ m/.*\.ape/)
     {
