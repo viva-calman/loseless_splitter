@@ -53,8 +53,9 @@ sub work_dir {
     for my $i (@filelist)
     {
         print "$i\n";
-        if ($i =~ m/.*\.wv\.iso/)
+        if ($i =~ m/.*\.wv\.iso$/ || $i =~ m/.*\.iso\.wv$/)
         {
+            print "wv.iso found. Unpacking\n";
             `7z x "$i" && mv "$i" "$i.old"`;
             work_dir();
             return 0
