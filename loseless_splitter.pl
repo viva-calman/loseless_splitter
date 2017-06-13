@@ -126,7 +126,8 @@ sub work_dir {
 
 sub cue_enc {
     my $cue = shift;
-    my $enc = `enca "$cue"`;
+    my $shell_str = "enca \"".shell_b($cue)."\"";
+    my $enc = `$shell_str`;
     if ($enc =~ m/.*UTF-8/ or $enc =~ m/7bit ASCII.*/)
     {
         return $cue;
@@ -136,7 +137,14 @@ sub cue_enc {
         return undef;
     }
 }
-
+#
+# Экранирование символов для вызовов shell
+#
+sub shell_b {
+    my $name = shift;
+    $name =~ s/(\$)/\\$1/;
+    return $name;
+}
 
 #
 # Парсинг Cue-файла
@@ -150,15 +158,16 @@ sub cue_analitic {
 
     if(cue_enc($cue_name))
     {
-        open $cuefile, $cue_name;
+        open $cuefile, "$cue_name";
     }
     else
     {
-        open $cuefile, "cat \"$cue_name\"|iconv -f CP1251|";
+        my $shell_str = "cat \"".shell_b($cue_name)."\"|iconv -f CP1251|";
+        open $cuefile, $shell_str;    
     }
     while(<$cuefile>)
     {
-        #print $_;
+        print $_;
         s/\r//;
         if(m/REM DATE (\d{4})/i)
         {
@@ -217,6 +226,7 @@ sub cue_analitic {
 =cut
 
 sub splitting {
+    #print Dumper($album_info->{FILE});
     if(1 < scalar keys $album_info->{FILE})
     {
         print "Creating additional dirs\n";
@@ -228,7 +238,7 @@ sub splitting {
         my $temp_i = $i;
         $temp_i =~ s/^"//;
         $temp_i =~ s/"$//;
-        $temp_i =~ s/(\[|\]|\(|\)|\\|\+)/\\$1/g;
+        $temp_i =~ s/(\[|\]|\(|\)|\\|\+|\$)/\\$1/g;
         if( -e "$temp_i" )
         {
             print "Found, process\n";
@@ -259,6 +269,7 @@ sub splitting {
 
 sub process {
     my $filename = shift;
+#    my $filename = shell_b($filename);
     my $filekey = shift;
     if($dirs != 0) # && 1 < scalar keys $album_info->{FILE}->{$filekey})
     {
@@ -386,6 +397,7 @@ sub split_track {
     my $filekey = shift;
     my $trackno = shift;
     my $encoding = shift;
+    $work_file = shell_b($work_file);
     my $begin = $album_info->{FILE}->{$filekey}->{$trackno}->{'INDEX 01'};
     $begin =~ s/:(\d{2})$/\.$1/;
     $trackno++;
